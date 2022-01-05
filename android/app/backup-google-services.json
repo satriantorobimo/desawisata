@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "999378919597",
+    "project_id": "desa-wisata-83e62",
+    "storage_bucket": "desa-wisata-83e62.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:999378919597:android:2917b023fd7676d683a624",
+        "android_client_info": {
+          "package_name": "desa_wisata_nusantara.go.desa_wisata_nusantara"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "999378919597-c5h4a77tibup0tn0lo407jlikohbvelb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDd6hQ7Cpq5rlCKEUCDDKixH1e1HyEdA8Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "999378919597-c5h4a77tibup0tn0lo407jlikohbvelb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

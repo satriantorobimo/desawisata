@@ -1,0 +1,23 @@
+import 'package:desa_wisata_nusantara/feature/splash/model/refresh_model.dart';
+import 'package:desa_wisata_nusantara/resources/url_string.dart';
+import 'package:desa_wisata_nusantara/util/network_util.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class RefreshApi {
+  RefreshModel refreshModel;
+
+  NetworkUtil netUtil = NetworkUtil();
+  UrlString urlString = UrlString();
+
+  Future<RefreshModel> attemptRefresh() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String token = prefs.getString('token');
+    final Map<String, String> header = urlString.getHeaderTypeWithToken(token);
+    return await netUtil
+        .post(urlString.getUrlRefresh(), headers: header)
+        .then((dynamic res) {
+      refreshModel = RefreshModel.fromJson(res);
+      return refreshModel;
+    });
+  }
+}
