@@ -17,7 +17,6 @@ import 'package:desa_wisata_nusantara/util/dynamic_link_service.dart';
 import 'package:desa_wisata_nusantara/util/general_util.dart';
 import 'package:desa_wisata_nusantara/util/shared_preff.dart';
 import 'package:desa_wisata_nusantara/widget/custom_dialog_login.dart';
-import 'package:device_information/device_information.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -109,58 +108,21 @@ class _TempatDetailScreenState extends State<TempatDetailScreen> {
   }
 
   Future<void> _initImei(bool isLike) async {
-    String _imei;
-    try {
-      final PermissionStatus permissionStatus = await _getPhonePermission();
-      if (permissionStatus.isGranted) {
-        _imei = await DeviceInformation.deviceIMEINumber;
-        print('imei: $_imei');
-        SharedPreff().savedSharedString('imei', _imei);
-        log('${GeneralUtil().encryptAES(_imei)}');
-      }
-    } on PlatformException {
-      _imei = 'IMEI Device not Found';
-    }
-    if (!mounted) return;
-    //disini
-    submitLikesBloc.add(AttemptSubmitLikes(widget.id.toString(),
-        isLike ? false : true, GeneralUtil().encryptAES(_imei)));
+    GeneralUtil().getDeviceDetails().then((value) => {
+          SharedPreff().savedSharedString('imei', value),
+          log('Imei : ${GeneralUtil().encryptAES(value)}'),
+          submitLikesBloc.add(AttemptSubmitLikes(widget.id.toString(),
+              isLike ? false : true, GeneralUtil().encryptAES(value)))
+        });
   }
 
   Future<void> _initImei2() async {
-    String _imei;
-    try {
-      final PermissionStatus permissionStatus = await _getPhonePermission();
-      if (permissionStatus.isGranted) {
-        _imei = await DeviceInformation.deviceIMEINumber;
-        print('imei: $_imei');
-        SharedPreff().savedSharedString('imei', _imei);
-        log('${GeneralUtil().encryptAES(_imei)}');
-        getLikesBloc
-            .add(AttemptGetLikes(widget.id, GeneralUtil().encryptAES(_imei)));
-      }
-    } on PlatformException {
-      _imei = 'IMEI Device not Found';
-    }
-    if (!mounted) return;
-  }
-
-  Future<PermissionStatus> _getPhonePermission() async {
-    final PermissionStatus permission = await Permission.phone.status;
-    if (permission != PermissionStatus.granted &&
-        permission != PermissionStatus.denied) {
-      final Map<Permission, PermissionStatus> permissionStatus =
-          await [Permission.phone].request();
-      return permissionStatus[Permission.phone] ??
-          PermissionStatus.undetermined;
-    } else if (permission == PermissionStatus.denied) {
-      final Map<Permission, PermissionStatus> permissionStatus =
-          await [Permission.phone].request();
-      return permissionStatus[Permission.phone] ??
-          PermissionStatus.undetermined;
-    } else {
-      return permission;
-    }
+    GeneralUtil().getDeviceDetails().then((value) => {
+          SharedPreff().savedSharedString('imei', value),
+          log('Imei : ${GeneralUtil().encryptAES(value)}'),
+          getLikesBloc
+              .add(AttemptGetLikes(widget.id, GeneralUtil().encryptAES(value)))
+        });
   }
 
   Future<bool> onLikeButtonTapped(bool isLike) async {
@@ -171,7 +133,7 @@ class _TempatDetailScreenState extends State<TempatDetailScreen> {
 
         /// if failed, you can do nothing
         // return success? !isLiked:isLiked;
-
+        log('Imei : ${GeneralUtil().encryptAES(value)}');
         submitLikesBloc.add(AttemptSubmitLikes(widget.id.toString(),
             isLike ? false : true, GeneralUtil().encryptAES(value)));
       } else {
@@ -420,12 +382,16 @@ class _TempatDetailScreenState extends State<TempatDetailScreen> {
               SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('${tempatDetailModel.data.title}',
-                      style: GoogleFonts.poppins(
-                          fontSize: 24,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold)),
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.72,
+                    child: Text('${tempatDetailModel.data.title}',
+                        style: GoogleFonts.poppins(
+                            fontSize: 24,
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold)),
+                  ),
                   BlocListener<GetLikesBloc, GetLikesState>(
                       cubit: getLikesBloc,
                       listener: (_, GetLikesState state) {
@@ -635,7 +601,7 @@ class _TempatDetailScreenState extends State<TempatDetailScreen> {
                       color: Colors.black,
                       fontWeight: FontWeight.bold)),
               SizedBox(height: 8),
-              Text(tempatDetailModel.data.facility,
+              Text(tempatDetailModel.data.facility ?? 'Tidak ada',
                   style: GoogleFonts.poppins(
                     fontSize: 11,
                     color: Colors.black,
@@ -672,7 +638,7 @@ class _TempatDetailScreenState extends State<TempatDetailScreen> {
                       color: Colors.black,
                       fontWeight: FontWeight.bold)),
               SizedBox(height: 8),
-              Text(tempatDetailModel.data.preparation,
+              Text(tempatDetailModel.data.preparation ?? 'Tidak ada',
                   style: GoogleFonts.poppins(
                     fontSize: 11,
                     color: Colors.black,
@@ -759,44 +725,53 @@ class _TempatDetailScreenState extends State<TempatDetailScreen> {
                         )),
                   ],
                 ),
-                Positioned(
-                  top: 8.0,
-                  right: 0.0,
-                  child: GestureDetector(
-                    onTap: () {
-                      final split =
-                          tempatDetailModel.data.locations.latLng.split(',');
-                      openMap(double.parse(split[0]), double.parse(split[1]));
-                    },
-                    child: Container(
-                        height: 40,
-                        decoration: BoxDecoration(
-                            color: primaryColor,
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(22))),
-                        child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              children: [
-                                Icon(CupertinoIcons.arrow_up_right_square_fill,
-                                    size: 21, color: Colors.white),
-                                SizedBox(width: 4),
-                                Text('Arahkan',
-                                    style: GoogleFonts.poppins(
-                                        fontSize: 12,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold)),
-                              ],
-                            ))),
-                  ),
-                ),
+                tempatDetailModel.data.locations.latLng == ""
+                    ? Container()
+                    : Positioned(
+                        top: 8.0,
+                        right: 0.0,
+                        child: GestureDetector(
+                          onTap: () {
+                            final split = tempatDetailModel
+                                .data.locations.latLng
+                                .split(',');
+                            openMap(
+                                double.parse(split[0]), double.parse(split[1]));
+                          },
+                          child: Container(
+                              height: 40,
+                              decoration: BoxDecoration(
+                                  color: primaryColor,
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(22))),
+                              child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                          CupertinoIcons
+                                              .arrow_up_right_square_fill,
+                                          size: 21,
+                                          color: Colors.white),
+                                      SizedBox(width: 4),
+                                      Text('Arahkan',
+                                          style: GoogleFonts.poppins(
+                                              fontSize: 12,
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold)),
+                                    ],
+                                  ))),
+                        ),
+                      ),
               ],
             ),
           ),
         ),
         SizedBox(height: 16),
-        Image.network(tempatDetailModel.data.locations.sourceMap,
-            fit: BoxFit.cover, width: double.infinity),
+        tempatDetailModel.data.locations.sourceMap == ""
+            ? Container()
+            : Image.network(tempatDetailModel.data.locations.sourceMap,
+                fit: BoxFit.cover, width: double.infinity),
       ],
     );
   }
@@ -908,7 +883,7 @@ class _TempatDetailScreenState extends State<TempatDetailScreen> {
                 Uri uri = snapshot.data;
                 return GestureDetector(
                   onTap: () => Share.share(
-                      'Hai, Aku mambagikan wisata dari aplikas desa wisata nusantara\n${uri.toString()}'),
+                      'Hai, Aku membagikan wisata dari aplikasi Desa Wisata Nusantara\n${uri.toString()}'),
                   child: Icon(Icons.share_outlined, color: Colors.black),
                 );
               } else {

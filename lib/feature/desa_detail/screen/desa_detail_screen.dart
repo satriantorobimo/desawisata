@@ -45,11 +45,13 @@ class _DesaDetailScreenState extends State<DesaDetailScreen> {
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: PreferredSize(
-          preferredSize: Size.fromHeight(110.0),
+          preferredSize: Size.fromHeight(120.0),
           child: AppBar(
             flexibleSpace: Padding(
               padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).size.height * 0.1, left: 16),
+                  top: MediaQuery.of(context).size.height * 0.1,
+                  left: 16,
+                  right: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -255,7 +257,7 @@ class _DesaDetailScreenState extends State<DesaDetailScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
-                          flex: 14,
+                          flex: 9,
                           child: Container(
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.only(
@@ -279,8 +281,8 @@ class _DesaDetailScreenState extends State<DesaDetailScreen> {
                         Expanded(
                           flex: 6,
                           child: Padding(
-                            padding: const EdgeInsets.only(
-                                left: 8.0, right: 8.0, top: 2.0),
+                            padding:
+                                const EdgeInsets.only(left: 8.0, right: 8.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [

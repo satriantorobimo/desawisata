@@ -93,20 +93,36 @@ class _UlasanScreenState extends State<UlasanScreen> {
     reffKunjunganBloc.add(GetReffKunjungan());
   }
 
-  _imgFromGallery() async {
-    var status = await Permission.photos.status;
-    if (status.isGranted) {
-      imageCache.maximumSize = 0;
-      imageCache.clear();
-      final _images = await ImagePicker().getImage(source: ImageSource.gallery);
-      if (_images != null) {
-        final File image = File(_images.path);
+  Future<bool> _requestPermission(Permission permission) async {
+    var status = await permission.status;
 
-        setState(() {
-          imageFileList.add(image);
-          imagePath.add(_images.path);
-        });
+    if (status.isDenied) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  _imgFromGallery() async {
+    if (await _requestPermission(Permission.camera)) {
+      try {
+        imageCache.maximumSize = 0;
+        imageCache.clear();
+        final _images =
+            await ImagePicker().getImage(source: ImageSource.gallery);
+        if (_images != null) {
+          final File image = File(_images.path);
+
+          setState(() {
+            imageFileList.add(image);
+            imagePath.add(_images.path);
+          });
+        }
+      } catch (e) {
+        log('$e');
       }
+    } else {
+      log('gagal');
     }
   }
 

@@ -20,7 +20,7 @@ class _IntroScreenState extends State<IntroScreen> {
   @override
   void dispose() {
     imageIntroBloc.close();
-    SharedPreff().savedSharedBool('intro', true);
+
     super.dispose();
   }
 

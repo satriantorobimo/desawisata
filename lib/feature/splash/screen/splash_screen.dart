@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:device_information/device_information.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -24,67 +23,43 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void dispose() {
     refreshBloc.close();
+    SharedPreff().savedSharedBool('intro', true);
     super.dispose();
   }
 
   @override
   void initState() {
-    _initImei();
-    super.initState();
-  }
-
-  Future<PermissionStatus> _getPhonePermission() async {
-    final PermissionStatus permission = await Permission.phone.status;
-    if (permission != PermissionStatus.granted &&
-        permission != PermissionStatus.denied) {
-      final Map<Permission, PermissionStatus> permissionStatus =
-          await [Permission.phone].request();
-      return permissionStatus[Permission.phone] ??
-          PermissionStatus.undetermined;
-    } else {
-      return permission;
-    }
-  }
-
-  Future<void> _initImei() async {
-    String _imei;
-    try {
-      final PermissionStatus permissionStatus = await _getPhonePermission();
-      if (permissionStatus.isGranted) {
-        _imei = await DeviceInformation.deviceIMEINumber;
-        print('imei: $_imei');
-        SharedPreff().savedSharedString('imei', _imei);
-        log('${GeneralUtil().encryptAES(_imei)}');
-      }
-    } on PlatformException {
-      _imei = 'IMEI Device not Found';
-    }
-    if (!mounted) return;
-    SharedPreff().getSharedString('token').then((value) {
-      log('$value');
-      if (value != null) {
-        refreshBloc.add(AttemptRefresh());
-      } else {
-        SharedPreff().getSharedBool('intro').then((value) {
-          log('$value');
-          if (value != null) {
-            if (value) {
-              Navigator.pushNamedAndRemoveUntil(
-                context,
-                bottomRoute,
-                (route) => false,
-              );
+    GeneralUtil().getDeviceDetails().then((value) => {
+          log('$value'),
+          SharedPreff().savedSharedString('imei', value),
+          SharedPreff().getSharedString('token').then((value) {
+            log('$value');
+            if (value != null) {
+              refreshBloc.add(AttemptRefresh());
             } else {
-              Navigator.pushNamedAndRemoveUntil(
-                  context, introRoute, (route) => false);
+              SharedPreff().getSharedBool('intro').then((value) {
+                log('$value');
+                if (value != null) {
+                  if (value) {
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      bottomRoute,
+                      (route) => false,
+                    );
+                  } else {
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, introRoute, (route) => false);
+                  }
+                } else {
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, introRoute, (route) => false);
+                }
+              });
             }
-          } else {
-            Navigator.pushNamedAndRemoveUntil(
-                context, introRoute, (route) => false);
-          }
+          })
         });
-      }
-    });
+
+    super.initState();
   }
 
   @override
@@ -101,9 +76,12 @@ class _SplashScreenState extends State<SplashScreen> {
                   context, bottomRoute, (route) => false);
             }
             if (state is RefreshError) {
+              SharedPreff().deleteSharedPref('token');
               Navigator.pushNamedAndRemoveUntil(
-                  context, loginRoute, (route) => false,
-                  arguments: true);
+                context,
+                bottomRoute,
+                (route) => false,
+              );
             }
           },
           child: BlocBuilder<RefreshBloc, RefreshState>(

@@ -26,7 +26,7 @@ class DynamicLinkService {
         if (deepLink.path != null) {
           String code = deepLink.queryParameters['code'];
 
-          Future<void>.delayed(const Duration(seconds: 3), () async {
+          Future<void>.delayed(const Duration(seconds: 2), () async {
             _navigationService.push(tempatDetailRoute, arguments: code);
           });
         }
@@ -93,20 +93,20 @@ class DynamicLinkService {
 
   Future<Uri> createDynamicLink(String code) async {
     final DynamicLinkParameters parameters = DynamicLinkParameters(
-      uriPrefix: 'https://desawisata.page.link/',
+      uriPrefix: 'https://desawisata.page.link',
       link: Uri.parse(
           'https://desawisata.page.link.com/wisata_detail?code=$code'),
       androidParameters: AndroidParameters(
           packageName: 'desa_wisata_nusantara.go.desa_wisata_nusantara',
           minimumVersion: 21),
       iosParameters: IosParameters(
-        bundleId: 'your_ios_bundle_identifier',
-        minimumVersion: '1',
-        appStoreId: 'your_app_store_id',
+        bundleId: 'desawisatanusantara.go.desaWisataNusantara',
+        minimumVersion: '10',
+        appStoreId: '123456789',
       ),
       socialMetaTagParameters: SocialMetaTagParameters(
         title: 'Hai',
-        description: 'Aku mambagikan wisata dari aplikas desa wisata nusantara',
+        description: 'Aku membagikan wisata dari aplikas Desa Wisata Nusantara',
         imageUrl: Uri.parse(''),
       ),
     );

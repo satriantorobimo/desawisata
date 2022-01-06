@@ -20,7 +20,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 GoogleSignIn _googleSignIn = GoogleSignIn(
   scopes: <String>[
     'email',
-    'https://www.googleapis.com/auth/contacts.readonly',
+    'https://www.googleapis.com/auth/userinfo.profile ',
   ],
 );
 
@@ -119,7 +119,23 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 )
-              : Container()
+              : GestureDetector(
+                  onTap: () {
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      bottomRoute,
+                      (route) => false,
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 24.0, right: 24.0),
+                    child: Text('Lewati',
+                        style: GoogleFonts.roboto(
+                            fontSize: 14,
+                            color: primaryColor,
+                            fontWeight: FontWeight.bold)),
+                  ),
+                )
         ],
       ),
       body: Padding(
