@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:desa_wisata_nusantara/feature/404/404_screen.dart';
 import 'package:desa_wisata_nusantara/feature/home/model/per_kab_model.dart';
 import 'package:desa_wisata_nusantara/feature/list_desa/bloc/list_desa/bloc.dart';
 import 'package:desa_wisata_nusantara/feature/list_desa/domain/repo/list_desa_repo.dart';
@@ -134,6 +135,12 @@ class _ListDesaScreenState extends State<ListDesaScreen> {
                             return popularMethod(dataDetail, false);
                           }
                         }
+                        if (state is ListDesaException) {
+                          return Error404Screen(onTap: () {
+                            listDesaBloc.add(GetListDesa(
+                                widget.perKabModel.id.toString(), 10, _page));
+                          });
+                        }
                         return Container();
                       }))
             ],
@@ -219,10 +226,12 @@ class _ListDesaScreenState extends State<ListDesaScreen> {
                                         color: Colors.black,
                                       )),
                                   SizedBox(height: 8),
-                                  Text('${items[index].description}',
-                                      style: GoogleFonts.poppins(
-                                          fontSize: 9, color: Colors.black)),
-                                  SizedBox(height: 16),
+                                  Container(
+                                    height: 45,
+                                    child: Text('${items[index].description}',
+                                        style: GoogleFonts.poppins(
+                                            fontSize: 9, color: Colors.black)),
+                                  ),
                                 ],
                               ),
                               Text(

@@ -1,4 +1,5 @@
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:desa_wisata_nusantara/feature/404/404_screen.dart';
 import 'package:desa_wisata_nusantara/feature/akun/bloc/akun/bloc.dart';
 import 'package:desa_wisata_nusantara/feature/akun/domain/repo/akun_repo.dart';
 import 'package:desa_wisata_nusantara/feature/home/bloc/category_home/bloc.dart';
@@ -42,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
     'papua.jpg',
   ];
   int _index = 0;
-  bool isEligible = false, isLoading = true;
+  bool isEligible = false, isLoading = true, isError = false;
   List<Menu> menu = [];
 
   List<T> map<T>(List list, Function handler) {
@@ -190,286 +191,327 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.white,
       body: RefreshIndicator(
         onRefresh: _pullRefresh,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 40),
-              !isEligible
-                  ? Padding(
-                      padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Image.asset(
-                                'assets/images/logo_home.png',
-                                height: 55,
-                              ),
-                              SizedBox(width: 8),
-                              Image.asset(
-                                'assets/images/logo_home_2.png',
-                                height: 45,
-                              ),
-                            ],
-                          ),
-                          CircleAvatar(
-                            radius: 30.0,
-                            backgroundImage:
-                                AssetImage("assets/images/tuyul.png"),
-                            backgroundColor: Colors.transparent,
-                          )
-                        ],
-                      ),
-                    )
-                  : BlocListener<AkunBloc, AkunState>(
-                      cubit: akunBloc,
-                      listener: (_, AkunState state) {
-                        if (state is AkunLoaded) {}
-                        if (state is AkunError) {}
-                      },
-                      child: BlocBuilder<AkunBloc, AkunState>(
-                          cubit: akunBloc,
-                          builder: (_, AkunState state) {
-                            if (state is AkunInitial) {
-                              return Container();
-                            }
-                            if (state is AkunLoading) {
-                              return Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 16.0, right: 16.0),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+        child: isError
+            ? Error404Screen(onTap: () {
+                setState(() {
+                  isError = false;
+                });
+                highlightBloc.add(GetHighlightContent());
+                popularBloc.add(GetPopularContent());
+                perKabBloc.add(GetTotalPerKab());
+                categoryHomeBloc.add(GetCategoryHome());
+                SharedPreff().getSharedString('token').then((value) {
+                  if (value != null) {
+                    akunBloc.add(GetAkun());
+                    setState(() {
+                      isEligible = true;
+                    });
+                  }
+                });
+              })
+            : SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 40),
+                    !isEligible
+                        ? Padding(
+                            padding:
+                                const EdgeInsets.only(left: 16.0, right: 16.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
-                                    Shimmer.fromColors(
-                                        baseColor: Colors.grey[300],
-                                        highlightColor: Colors.grey[100],
-                                        child: Container(
-                                          width: 160,
-                                          height: 55,
-                                          color: Colors.white,
-                                        )),
-                                    Shimmer.fromColors(
-                                        baseColor: Colors.grey[300],
-                                        highlightColor: Colors.grey[100],
-                                        child: Container(
-                                          width: 60,
-                                          height: 60,
-                                          margin: EdgeInsets.all(10.0),
-                                          decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              shape: BoxShape.circle),
-                                        )),
-                                  ],
-                                ),
-                              );
-                            }
-                            if (state is AkunLoaded) {
-                              return Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 16.0, right: 16.0),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        Image.asset(
-                                          'assets/images/logo_home.png',
-                                          height: 55,
-                                        ),
-                                        SizedBox(width: 8),
-                                        Image.asset(
-                                          'assets/images/logo_home_2.png',
-                                          height: 45,
-                                        ),
-                                      ],
+                                    Image.asset(
+                                      'assets/images/logo_home.png',
+                                      height: 55,
                                     ),
-                                    CircleAvatar(
-                                      radius: 25.0,
-                                      backgroundImage: NetworkImage(
-                                          "${state.akunModel.data.sourceImage}"),
-                                      backgroundColor: Colors.transparent,
-                                    )
+                                    SizedBox(width: 8),
+                                    Image.asset(
+                                      'assets/images/logo_home_2.png',
+                                      height: 45,
+                                    ),
                                   ],
                                 ),
-                              );
-                            }
-                            if (state is AkunError) {
+                                CircleAvatar(
+                                  radius: 30.0,
+                                  backgroundImage:
+                                      AssetImage("assets/images/tuyul.png"),
+                                  backgroundColor: Colors.transparent,
+                                )
+                              ],
+                            ),
+                          )
+                        : BlocListener<AkunBloc, AkunState>(
+                            cubit: akunBloc,
+                            listener: (_, AkunState state) {
+                              if (state is AkunLoaded) {}
+                              if (state is AkunError) {}
+                              if (state is AkunException) {
+                                setState(() {
+                                  isError = true;
+                                });
+                              }
+                            },
+                            child: BlocBuilder<AkunBloc, AkunState>(
+                                cubit: akunBloc,
+                                builder: (_, AkunState state) {
+                                  if (state is AkunInitial) {
+                                    return Container();
+                                  }
+                                  if (state is AkunLoading) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 16.0, right: 16.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Shimmer.fromColors(
+                                              baseColor: Colors.grey[300],
+                                              highlightColor: Colors.grey[100],
+                                              child: Container(
+                                                width: 160,
+                                                height: 55,
+                                                color: Colors.white,
+                                              )),
+                                          Shimmer.fromColors(
+                                              baseColor: Colors.grey[300],
+                                              highlightColor: Colors.grey[100],
+                                              child: Container(
+                                                width: 60,
+                                                height: 60,
+                                                margin: EdgeInsets.all(10.0),
+                                                decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    shape: BoxShape.circle),
+                                              )),
+                                        ],
+                                      ),
+                                    );
+                                  }
+                                  if (state is AkunLoaded) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 16.0, right: 16.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Image.asset(
+                                                'assets/images/logo_home.png',
+                                                height: 55,
+                                              ),
+                                              SizedBox(width: 8),
+                                              Image.asset(
+                                                'assets/images/logo_home_2.png',
+                                                height: 45,
+                                              ),
+                                            ],
+                                          ),
+                                          CircleAvatar(
+                                            radius: 25.0,
+                                            backgroundImage: NetworkImage(
+                                                "${state.akunModel.data.sourceImage}"),
+                                            backgroundColor: Colors.transparent,
+                                          )
+                                        ],
+                                      ),
+                                    );
+                                  }
+                                  if (state is AkunError) {
+                                    return Container();
+                                  }
+                                  return Container();
+                                }),
+                          ),
+                    BlocListener<CategoryHomeBloc, CategoryHomeState>(
+                        cubit: categoryHomeBloc,
+                        listener: (_, CategoryHomeState state) {
+                          if (state is CategoryHomeLoaded) {}
+                          if (state is CategoryHomeError) {}
+                          if (state is CategoryHomeException) {
+                            setState(() {
+                              isError = true;
+                            });
+                          }
+                        },
+                        child: BlocBuilder<CategoryHomeBloc, CategoryHomeState>(
+                            cubit: categoryHomeBloc,
+                            builder: (_, CategoryHomeState state) {
+                              if (state is CategoryHomeInitial) {
+                                return loadingSkeletonMenu(context);
+                              }
+                              if (state is CategoryHomeLoading) {
+                                return loadingSkeletonMenu(context);
+                              }
+                              if (state is CategoryHomeLoaded) {
+                                return contentCategory(state.categoryHomeModel);
+                              }
+                              if (state is CategoryHomeError) {
+                                return Container();
+                              }
                               return Container();
-                            }
-                            return Container();
-                          }),
+                            })),
+                    SizedBox(height: 16),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Text('Rencanakan liburan Anda',
+                          style: GoogleFonts.montserrat(
+                              fontSize: 16,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold)),
                     ),
-              BlocListener<CategoryHomeBloc, CategoryHomeState>(
-                  cubit: categoryHomeBloc,
-                  listener: (_, CategoryHomeState state) {
-                    if (state is CategoryHomeLoaded) {}
-                    if (state is CategoryHomeError) {}
-                  },
-                  child: BlocBuilder<CategoryHomeBloc, CategoryHomeState>(
-                      cubit: categoryHomeBloc,
-                      builder: (_, CategoryHomeState state) {
-                        if (state is CategoryHomeInitial) {
-                          return loadingSkeletonMenu(context);
-                        }
-                        if (state is CategoryHomeLoading) {
-                          return loadingSkeletonMenu(context);
-                        }
-                        if (state is CategoryHomeLoaded) {
-                          return contentCategory(state.categoryHomeModel);
-                        }
-                        if (state is CategoryHomeError) {
-                          return Container();
-                        }
-                        return Container();
-                      })),
-              SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Text('Rencanakan liburan Anda',
-                    style: GoogleFonts.montserrat(
-                        fontSize: 16,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold)),
+                    SizedBox(height: 4),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Text(
+                          'Jelajahi desa, mari kita bangun perekonomian desa',
+                          style: GoogleFonts.montserrat(
+                            fontSize: 10,
+                            color: Colors.black,
+                          )),
+                    ),
+                    SizedBox(height: 16),
+                    BlocListener<PerKabBloc, PerKabState>(
+                        cubit: perKabBloc,
+                        listener: (_, PerKabState state) {
+                          if (state is PerKabLoaded) {}
+                          if (state is PerKabError) {}
+                          if (state is PerKabException) {
+                            setState(() {
+                              isError = true;
+                            });
+                          }
+                        },
+                        child: BlocBuilder<PerKabBloc, PerKabState>(
+                            cubit: perKabBloc,
+                            builder: (_, PerKabState state) {
+                              if (state is PerKabInitial) {
+                                return LoadingSkeletonSmall();
+                              }
+                              if (state is PerKabLoading) {
+                                return LoadingSkeletonSmall();
+                              }
+                              if (state is PerKabLoaded) {
+                                return perkabMethod(state.perKabModel);
+                              }
+                              if (state is PerKabError) {
+                                return Container();
+                              }
+                              return Container();
+                            })),
+                    SizedBox(height: 32),
+                    // Padding(
+                    //   padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    //   child: Container(
+                    //     width: double.infinity,
+                    //     height: 180.0,
+                    //     decoration: BoxDecoration(
+                    //         borderRadius: BorderRadius.all(Radius.circular(12)),
+                    //         image: DecorationImage(
+                    //             image: AssetImage(
+                    //               'assets/images/travel.jpg',
+                    //             ),
+                    //             fit: BoxFit.fill,
+                    //             colorFilter: ColorFilter.mode(
+                    //                 Colors.grey.withOpacity(0.4), BlendMode.darken))),
+                    //     child: Column(
+                    //       mainAxisAlignment: MainAxisAlignment.center,
+                    //       crossAxisAlignment: CrossAxisAlignment.center,
+                    //       children: [
+                    //         Text('Desa Wisata yang menarik disekitarmu ',
+                    //             textAlign: TextAlign.center,
+                    //             style: GoogleFonts.poppins(
+                    //                 fontSize: 24,
+                    //                 color: Colors.white,
+                    //                 fontWeight: FontWeight.bold)),
+                    //         SizedBox(height: 16),
+                    //         Container(
+                    //           width: 160,
+                    //           height: 40,
+                    //           child: ElevatedButton(
+                    //             style: ButtonStyle(
+                    //                 foregroundColor: MaterialStateProperty.all<Color>(
+                    //                     Colors.transparent),
+                    //                 backgroundColor: MaterialStateProperty.all<Color>(
+                    //                   Colors.transparent,
+                    //                 ),
+                    //                 shape: MaterialStateProperty.all<
+                    //                         RoundedRectangleBorder>(
+                    //                     RoundedRectangleBorder(
+                    //                   side: BorderSide(color: Colors.white),
+                    //                   borderRadius: BorderRadius.circular(20.0),
+                    //                 ))),
+                    //             child: Text('Terus Telusuri',
+                    //                 style: GoogleFonts.poppins(
+                    //                     fontSize: 14,
+                    //                     fontWeight: FontWeight.bold,
+                    //                     color: Colors.white)),
+                    //             onPressed: () {},
+                    //           ),
+                    //         )
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+                    // SizedBox(height: 32),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Text('Destinasi populer',
+                          style: GoogleFonts.montserrat(
+                              fontSize: 16,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold)),
+                    ),
+                    SizedBox(height: 4),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child:
+                          Text('Tempat wisata  terpopuler berdasarkan ulasan',
+                              style: GoogleFonts.montserrat(
+                                fontSize: 10,
+                                color: Colors.black,
+                              )),
+                    ),
+                    BlocListener<PopularBloc, PopularState>(
+                        cubit: popularBloc,
+                        listener: (_, PopularState state) {
+                          if (state is PopularLoaded) {}
+                          if (state is PopularError) {}
+                          if (state is PopularException) {
+                            setState(() {
+                              isError = true;
+                            });
+                          }
+                        },
+                        child: BlocBuilder<PopularBloc, PopularState>(
+                            cubit: popularBloc,
+                            builder: (_, PopularState state) {
+                              if (state is PopularInitial) {
+                                return LoadingSkeletonHiglight();
+                              }
+                              if (state is PopularLoading) {
+                                return LoadingSkeletonHiglight();
+                              }
+                              if (state is PopularLoaded) {
+                                return popularMethod(state.highlightModel);
+                              }
+                              if (state is PopularError) {
+                                return LoadingSkeletonHiglight();
+                              }
+                              return LoadingSkeletonHiglight();
+                            })),
+                    SizedBox(height: 16),
+                  ],
+                ),
               ),
-              SizedBox(height: 4),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Text('Jelajahi desa, mari kita bangun perekonomian desa',
-                    style: GoogleFonts.montserrat(
-                      fontSize: 10,
-                      color: Colors.black,
-                    )),
-              ),
-              SizedBox(height: 16),
-              BlocListener<PerKabBloc, PerKabState>(
-                  cubit: perKabBloc,
-                  listener: (_, PerKabState state) {
-                    if (state is PerKabLoaded) {}
-                    if (state is PerKabError) {}
-                  },
-                  child: BlocBuilder<PerKabBloc, PerKabState>(
-                      cubit: perKabBloc,
-                      builder: (_, PerKabState state) {
-                        if (state is PerKabInitial) {
-                          return LoadingSkeletonSmall();
-                        }
-                        if (state is PerKabLoading) {
-                          return LoadingSkeletonSmall();
-                        }
-                        if (state is PerKabLoaded) {
-                          return perkabMethod(state.perKabModel);
-                        }
-                        if (state is PerKabError) {
-                          return Container();
-                        }
-                        return Container();
-                      })),
-              SizedBox(height: 32),
-              // Padding(
-              //   padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              //   child: Container(
-              //     width: double.infinity,
-              //     height: 180.0,
-              //     decoration: BoxDecoration(
-              //         borderRadius: BorderRadius.all(Radius.circular(12)),
-              //         image: DecorationImage(
-              //             image: AssetImage(
-              //               'assets/images/travel.jpg',
-              //             ),
-              //             fit: BoxFit.fill,
-              //             colorFilter: ColorFilter.mode(
-              //                 Colors.grey.withOpacity(0.4), BlendMode.darken))),
-              //     child: Column(
-              //       mainAxisAlignment: MainAxisAlignment.center,
-              //       crossAxisAlignment: CrossAxisAlignment.center,
-              //       children: [
-              //         Text('Desa Wisata yang menarik disekitarmu ',
-              //             textAlign: TextAlign.center,
-              //             style: GoogleFonts.poppins(
-              //                 fontSize: 24,
-              //                 color: Colors.white,
-              //                 fontWeight: FontWeight.bold)),
-              //         SizedBox(height: 16),
-              //         Container(
-              //           width: 160,
-              //           height: 40,
-              //           child: ElevatedButton(
-              //             style: ButtonStyle(
-              //                 foregroundColor: MaterialStateProperty.all<Color>(
-              //                     Colors.transparent),
-              //                 backgroundColor: MaterialStateProperty.all<Color>(
-              //                   Colors.transparent,
-              //                 ),
-              //                 shape: MaterialStateProperty.all<
-              //                         RoundedRectangleBorder>(
-              //                     RoundedRectangleBorder(
-              //                   side: BorderSide(color: Colors.white),
-              //                   borderRadius: BorderRadius.circular(20.0),
-              //                 ))),
-              //             child: Text('Terus Telusuri',
-              //                 style: GoogleFonts.poppins(
-              //                     fontSize: 14,
-              //                     fontWeight: FontWeight.bold,
-              //                     color: Colors.white)),
-              //             onPressed: () {},
-              //           ),
-              //         )
-              //       ],
-              //     ),
-              //   ),
-              // ),
-              // SizedBox(height: 32),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Text('Destinasi populer',
-                    style: GoogleFonts.montserrat(
-                        fontSize: 16,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold)),
-              ),
-              SizedBox(height: 4),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Text('Tempat wisata  terpopuler berdasarkan ulasan',
-                    style: GoogleFonts.montserrat(
-                      fontSize: 10,
-                      color: Colors.black,
-                    )),
-              ),
-              BlocListener<PopularBloc, PopularState>(
-                  cubit: popularBloc,
-                  listener: (_, PopularState state) {
-                    if (state is PopularLoaded) {}
-                    if (state is PopularError) {}
-                  },
-                  child: BlocBuilder<PopularBloc, PopularState>(
-                      cubit: popularBloc,
-                      builder: (_, PopularState state) {
-                        if (state is PopularInitial) {
-                          return LoadingSkeletonHiglight();
-                        }
-                        if (state is PopularLoading) {
-                          return LoadingSkeletonHiglight();
-                        }
-                        if (state is PopularLoaded) {
-                          return popularMethod(state.highlightModel);
-                        }
-                        if (state is PopularError) {
-                          return LoadingSkeletonHiglight();
-                        }
-                        return LoadingSkeletonHiglight();
-                      })),
-              SizedBox(height: 16),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -608,7 +650,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         text: '${perKabModel.data[index].namaProv}\n',
                         style: GoogleFonts.poppins(
                             color: Colors.white,
-                            fontSize: 30,
+                            fontSize: 27,
                             fontWeight: FontWeight.bold),
                       ),
                       TextSpan(
@@ -655,7 +697,7 @@ class _HomeScreenState extends State<HomeScreen> {
               },
               child: Container(
                 width: double.infinity,
-                height: 160.0,
+                height: 170.0,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(12)),
                   border: Border.all(

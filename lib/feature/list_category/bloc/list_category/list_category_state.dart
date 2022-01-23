@@ -36,3 +36,11 @@ class ListCategoryError extends ListCategoryState {
   @override
   List<Object> get props => [error];
 }
+
+class ListCategoryException extends ListCategoryState {
+  const ListCategoryException(this.error) : assert(error != null);
+  final String error;
+
+  @override
+  List<Object> get props => [error];
+}

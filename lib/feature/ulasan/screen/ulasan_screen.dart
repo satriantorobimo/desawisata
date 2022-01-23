@@ -13,6 +13,7 @@ import 'package:desa_wisata_nusantara/util/shared_preff.dart';
 import 'package:desa_wisata_nusantara/widget/custom_dialog.dart';
 import 'package:desa_wisata_nusantara/widget/custom_dialog_error.dart';
 import 'package:desa_wisata_nusantara/widget/custom_dialog_login.dart';
+import 'package:desa_wisata_nusantara/widget/custom_dialog_prelaunch.dart';
 import 'package:desa_wisata_nusantara/widget/custom_loading_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -248,6 +249,16 @@ class _UlasanScreenState extends State<UlasanScreen> {
                         }
                         if (state is SubmitReviewException) {
                           Navigator.pop(context);
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) =>
+                                  CustomDialogPrelaunch(
+                                    value: 'Opps terjadi kesalahan system',
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                    },
+                                    isSuccess: false,
+                                  ));
                         }
                       },
                       child: BlocBuilder<SubmitReviewBloc, SubmitReviewState>(

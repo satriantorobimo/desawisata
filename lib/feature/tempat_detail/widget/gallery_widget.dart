@@ -47,30 +47,27 @@ class _GalleryWidgetState extends State<GalleryWidget> {
                       color: Colors.black,
                       fontWeight: FontWeight.bold)),
               SizedBox(height: 16),
-              SizedBox(
-                height: MediaQuery.of(context).size.height,
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  itemCount: widget.photos.length,
-                  physics: NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16),
-                  itemBuilder: (BuildContext context, int index) {
-                    return GestureDetector(
-                        onTap: () {
-                          List<Photos> photos = [];
-                          photos.add(widget.photos[index]);
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => PhotoViewWidget(photos),
-                              ));
-                        },
-                        child: Image.network(widget.photos[index].sourceImage));
-                  },
-                ),
+              GridView.builder(
+                shrinkWrap: true,
+                itemCount: widget.photos.length,
+                physics: NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16),
+                itemBuilder: (BuildContext context, int index) {
+                  return GestureDetector(
+                      onTap: () {
+                        List<Photos> photos = [];
+                        photos.add(widget.photos[index]);
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PhotoViewWidget(photos),
+                            ));
+                      },
+                      child: Image.network(widget.photos[index].sourceImage));
+                },
               )
             ],
           ),

@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:desa_wisata_nusantara/feature/404/404_screen.dart';
 import 'package:desa_wisata_nusantara/feature/splash/bloc/refresh/bloc.dart';
 import 'package:desa_wisata_nusantara/feature/splash/domain/repo/refresh_repo.dart';
 import 'package:desa_wisata_nusantara/resources/color_swatch.dart';
@@ -83,6 +84,14 @@ class _SplashScreenState extends State<SplashScreen> {
                 (route) => false,
               );
             }
+            if (state is RefreshException) {
+              SharedPreff().deleteSharedPref('token');
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                bottomRoute,
+                (route) => false,
+              );
+            }
           },
           child: BlocBuilder<RefreshBloc, RefreshState>(
               cubit: refreshBloc,
@@ -97,6 +106,9 @@ class _SplashScreenState extends State<SplashScreen> {
                   return mainContent(context);
                 }
                 if (state is RefreshError) {
+                  return mainContent(context);
+                }
+                if (state is RefreshException) {
                   return mainContent(context);
                 }
                 return mainContent(context);

@@ -37,3 +37,11 @@ class ListDesaError extends ListDesaState {
   @override
   List<Object> get props => [error];
 }
+
+class ListDesaException extends ListDesaState {
+  const ListDesaException(this.error) : assert(error != null);
+  final String error;
+
+  @override
+  List<Object> get props => [error];
+}

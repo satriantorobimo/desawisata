@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:desa_wisata_nusantara/feature/404/404_screen.dart';
 import 'package:desa_wisata_nusantara/feature/tempat_detail/bloc/get_likes/bloc.dart';
 import 'package:desa_wisata_nusantara/feature/tempat_detail/bloc/submit_likes/bloc.dart';
 import 'package:desa_wisata_nusantara/feature/tempat_detail/bloc/tempat_detail/bloc.dart';
@@ -55,7 +56,8 @@ class _TempatDetailScreenState extends State<TempatDetailScreen> {
   bool bacaSelengkapnya = false,
       isLoading = true,
       isLiked = false,
-      isLoadingLikes = true;
+      isLoadingLikes = true,
+      isError = false;
 
   int likeCount = 0;
 
@@ -154,132 +156,147 @@ class _TempatDetailScreenState extends State<TempatDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: RefreshIndicator(
-        onRefresh: _pullRefresh,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              BlocListener<TempatDetailBloc, TempatDetailState>(
-                  cubit: tempatDetailBloc,
-                  listener: (_, TempatDetailState state) {
-                    if (state is TempatDetailLoaded) {
-                      setState(() {
-                        tempatDetailModel = state.tempatDetailModel;
-                        likeCount = state.tempatDetailModel.data.likes ?? 0;
-                        isLoading = false;
-                      });
-                      SharedPreff().getSharedString('imei').then((value) {
-                        if (value != null) {
-                          /// send your request here
-                          // final bool success= await sendRequest();
+      body: isError
+          ? Error404Screen(onTap: () {
+              setState(() {
+                isError = false;
+              });
+              tempatDetailBloc.add(GetTempatDetail(widget.id));
+            })
+          : RefreshIndicator(
+              onRefresh: _pullRefresh,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    BlocListener<TempatDetailBloc, TempatDetailState>(
+                        cubit: tempatDetailBloc,
+                        listener: (_, TempatDetailState state) {
+                          if (state is TempatDetailLoaded) {
+                            setState(() {
+                              tempatDetailModel = state.tempatDetailModel;
+                              likeCount =
+                                  state.tempatDetailModel.data.likes ?? 0;
+                              isLoading = false;
+                            });
+                            SharedPreff().getSharedString('imei').then((value) {
+                              if (value != null) {
+                                /// send your request here
+                                // final bool success= await sendRequest();
 
-                          /// if failed, you can do nothing
-                          // return success? !isLiked:isLiked;
+                                /// if failed, you can do nothing
+                                // return success? !isLiked:isLiked;
 
-                          getLikesBloc.add(AttemptGetLikes(
-                              widget.id, GeneralUtil().encryptAES(value)));
-                        } else {
-                          _initImei2();
-                        }
-                      });
-                    }
-                    if (state is TempatDetailError) {
-                      setState(() {
-                        isLoading = false;
-                      });
-                    }
-                  },
-                  child: BlocBuilder<TempatDetailBloc, TempatDetailState>(
-                      cubit: tempatDetailBloc,
-                      builder: (_, TempatDetailState state) {
-                        if (state is TempatDetailInitial) {
-                          return LoadingSkeletonTempatDetail();
-                        }
-                        if (state is TempatDetailLoading) {
-                          return LoadingSkeletonTempatDetail();
-                        }
-                        if (state is TempatDetailLoaded) {
-                          return detailContentMethod(state.tempatDetailModel);
-                        }
-                        if (state is TempatDetailError) {
-                          return Container();
-                        }
-                        return Container();
-                      })),
-              SizedBox(height: 24),
-              Container(
-                width: double.infinity,
-                height: 35,
-                child: ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    scrollDirection: Axis.horizontal,
-                    separatorBuilder: (BuildContext context, int index) {
-                      return const SizedBox(
-                        width: 24,
-                      );
-                    },
-                    padding: EdgeInsets.symmetric(horizontal: 16.0),
-                    itemCount: menuDetail.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _indexMenuDetail = index;
-                          });
+                                getLikesBloc.add(AttemptGetLikes(widget.id,
+                                    GeneralUtil().encryptAES(value)));
+                              } else {
+                                _initImei2();
+                              }
+                            });
+                          }
+                          if (state is TempatDetailError) {
+                            setState(() {
+                              isLoading = false;
+                            });
+                          }
+                          if (state is TempatDetailException) {
+                            setState(() {
+                              isError = true;
+                            });
+                          }
                         },
-                        child: Column(
-                          children: <Widget>[
-                            FittedBox(
-                              child: Container(
-                                child: Stack(
-                                  children: <Widget>[
-                                    Padding(
-                                      padding: const EdgeInsets.only(bottom: 8),
-                                      child: Text(
-                                        menuDetail[index],
-                                        style: GoogleFonts.poppins(
-                                            fontSize: 17,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black),
+                        child: BlocBuilder<TempatDetailBloc, TempatDetailState>(
+                            cubit: tempatDetailBloc,
+                            builder: (_, TempatDetailState state) {
+                              if (state is TempatDetailInitial) {
+                                return LoadingSkeletonTempatDetail();
+                              }
+                              if (state is TempatDetailLoading) {
+                                return LoadingSkeletonTempatDetail();
+                              }
+                              if (state is TempatDetailLoaded) {
+                                return detailContentMethod(
+                                    state.tempatDetailModel);
+                              }
+                              if (state is TempatDetailError) {
+                                return Container();
+                              }
+                              return Container();
+                            })),
+                    SizedBox(height: 24),
+                    Container(
+                      width: double.infinity,
+                      height: 35,
+                      child: ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          scrollDirection: Axis.horizontal,
+                          separatorBuilder: (BuildContext context, int index) {
+                            return const SizedBox(
+                              width: 24,
+                            );
+                          },
+                          padding: EdgeInsets.symmetric(horizontal: 16.0),
+                          itemCount: menuDetail.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _indexMenuDetail = index;
+                                });
+                              },
+                              child: Column(
+                                children: <Widget>[
+                                  FittedBox(
+                                    child: Container(
+                                      child: Stack(
+                                        children: <Widget>[
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                bottom: 8),
+                                            child: Text(
+                                              menuDetail[index],
+                                              style: GoogleFonts.poppins(
+                                                  fontSize: 17,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black),
+                                            ),
+                                          ),
+                                          _indexMenuDetail == index
+                                              ? Positioned.fill(
+                                                  child: Column(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.end,
+                                                    children: <Widget>[
+                                                      SizedBox(height: 5),
+                                                      Container(
+                                                        height: 4,
+                                                        color: Colors.black,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                )
+                                              : Container(),
+                                        ],
                                       ),
                                     ),
-                                    _indexMenuDetail == index
-                                        ? Positioned.fill(
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.end,
-                                              children: <Widget>[
-                                                SizedBox(height: 5),
-                                                Container(
-                                                  height: 4,
-                                                  color: Colors.black,
-                                                ),
-                                              ],
-                                            ),
-                                          )
-                                        : Container(),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }),
+                            );
+                          }),
+                    ),
+                    SizedBox(height: 16),
+                    isLoading
+                        ? Container()
+                        : _indexMenuDetail == 0
+                            ? UlasanWidget(tempatDetailModel)
+                            : TanyaJawabWidget(tempatDetailModel),
+                    SizedBox(height: 24),
+                  ],
+                ),
               ),
-              SizedBox(height: 16),
-              isLoading
-                  ? Container()
-                  : _indexMenuDetail == 0
-                      ? UlasanWidget(tempatDetailModel)
-                      : TanyaJawabWidget(tempatDetailModel),
-              SizedBox(height: 24),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 
@@ -385,7 +402,7 @@ class _TempatDetailScreenState extends State<TempatDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    width: MediaQuery.of(context).size.width * 0.72,
+                    width: MediaQuery.of(context).size.width * 0.69,
                     child: Text('${tempatDetailModel.data.title}',
                         style: GoogleFonts.poppins(
                             fontSize: 24,
@@ -510,17 +527,11 @@ class _TempatDetailScreenState extends State<TempatDetailScreen> {
                         fontSize: 11,
                         color: Colors.black,
                       ))
-                  : Html(
-                      data: tempatDetailModel.data.content,
-                      style: {
-                        'body': Style(
-                            fontSize: FontSize(11),
-                            color: Colors.black,
-                            textAlign: TextAlign.justify,
-                            margin: EdgeInsets.zero,
-                            padding: EdgeInsets.zero),
-                      },
-                    ),
+                  : Text('${tempatDetailModel.data.content}',
+                      style: GoogleFonts.poppins(
+                        fontSize: 11,
+                        color: Colors.black,
+                      )),
               SizedBox(height: 8),
               GestureDetector(
                 onTap: () {

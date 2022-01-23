@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:desa_wisata_nusantara/feature/404/404_screen.dart';
 import 'package:desa_wisata_nusantara/feature/search/bloc/search/bloc.dart';
 import 'package:desa_wisata_nusantara/feature/search/domain/repo/search_repo.dart';
 import 'package:desa_wisata_nusantara/feature/search/model/search_model.dart';
@@ -222,6 +223,11 @@ class _SearchScreenState extends State<SearchScreen> {
                           }
                           if (state is SearchError) {
                             return Container();
+                          }
+                          if (state is SearchException) {
+                            return Error404Screen(onTap: () {
+                              searchBloc.add(GetSearchValue(_values));
+                            });
                           }
                           return Container();
                         })),

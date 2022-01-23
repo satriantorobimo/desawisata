@@ -59,7 +59,7 @@ class ListCategoryBloc extends Bloc<ListCategoryEvent, ListCategoryState> {
         }
       } catch (e) {
         print(e);
-        yield ListCategoryError(e.toString());
+        yield ListCategoryException(e.toString());
       }
     }
   }

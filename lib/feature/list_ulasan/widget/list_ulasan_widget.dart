@@ -1,3 +1,4 @@
+import 'package:desa_wisata_nusantara/feature/404/404_screen.dart';
 import 'package:desa_wisata_nusantara/feature/list_ulasan/bloc/list_ulasan/bloc.dart';
 import 'package:desa_wisata_nusantara/feature/list_ulasan/domain/repo/list_ulasan_repo.dart';
 import 'package:desa_wisata_nusantara/feature/list_ulasan/widget/loading_skeleton_widget.dart';
@@ -97,6 +98,19 @@ class _ListUlasanWidgetState extends State<ListUlasanWidget> {
                       if (state is ListUlasanError) {
                         return contentEmpty();
                       }
+                      if (state is ListUlasanException) {
+                        return Error404Screen(onTap: () {
+                          SharedPreff().getSharedString('token').then((value) {
+                            if (value != null) {
+                              listUlasanBloc.add(GetMyReview(_page, 10));
+                              setState(() {
+                                isEligible = true;
+                              });
+                            }
+                          });
+                        });
+                      }
+
                       return Container();
                     })),
       ),

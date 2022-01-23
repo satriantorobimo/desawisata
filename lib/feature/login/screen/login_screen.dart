@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:developer';
+import 'dart:io';
 import 'package:desa_wisata_nusantara/feature/signup/bloc/signup_fb/bloc.dart';
 import 'package:desa_wisata_nusantara/feature/signup/bloc/signup_google/bloc.dart';
 import 'package:desa_wisata_nusantara/feature/signup/domain/repo/signup_repo.dart';
@@ -16,6 +18,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 GoogleSignIn _googleSignIn = GoogleSignIn(
   scopes: <String>[
@@ -33,7 +36,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  bool isObsecure = true, isLoggedIn = false;
+  bool isObsecure = true, isLoggedIn = false, isIos = false;
   TextEditingController _emailCtrl = TextEditingController();
   TextEditingController _pwdCtrl = TextEditingController();
 
@@ -52,6 +55,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void initState() {
+    if (Platform.isIOS) {
+      setState(() {
+        isIos = true;
+      });
+    }
     super.initState();
   }
 
@@ -178,6 +186,18 @@ class _LoginScreenState extends State<LoginScreen> {
                                     isSuccess: false,
                                   ));
                         }
+                        if (state is SignupGoogleException) {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) =>
+                                  CustomDialogPrelaunch(
+                                    value: 'Opps terjadi kesalahan system',
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                    },
+                                    isSuccess: false,
+                                  ));
+                        }
                       },
                       child: BlocBuilder<SignupGoogleBloc, SignupGoogleState>(
                           cubit: signupGoogleBloc,
@@ -208,6 +228,52 @@ class _LoginScreenState extends State<LoginScreen> {
                             }
                             return googleSigninMethod(context);
                           })),
+                  isIos ? SizedBox(height: 24) : Container(),
+                  isIos
+                      ? SignInWithAppleButton(
+                          style: SignInWithAppleButtonStyle.whiteOutlined,
+                          borderRadius: BorderRadius.circular(24.0),
+                          onPressed: () async {
+                            try {
+                              final credential =
+                                  await SignInWithApple.getAppleIDCredential(
+                                scopes: [
+                                  AppleIDAuthorizationScopes.email,
+                                  AppleIDAuthorizationScopes.fullName,
+                                ],
+                              );
+                              log('$credential');
+                              print(credential.state);
+                              print(credential.email);
+                              print(credential.authorizationCode);
+                              print(credential.identityToken);
+                              print(credential.userIdentifier);
+                              print(credential.givenName);
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) =>
+                                      CustomDialogPrelaunch(
+                                        value:
+                                            'Signin with Apple Success\n ${credential.authorizationCode}',
+                                        onTap: () {
+                                          Navigator.pop(context);
+                                        },
+                                        isSuccess: true,
+                                      ));
+                            } catch (e) {
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) =>
+                                      CustomDialogPrelaunch(
+                                        value: 'Opps $e',
+                                        onTap: () {
+                                          Navigator.pop(context);
+                                        },
+                                        isSuccess: false,
+                                      ));
+                            }
+                          })
+                      : Container(),
                   SizedBox(height: 40),
                   Center(
                     child: Text('Atau masuk menggunakan',
@@ -334,6 +400,18 @@ class _LoginScreenState extends State<LoginScreen> {
                               builder: (BuildContext context) =>
                                   CustomDialogPrelaunch(
                                     value: state.error,
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                    },
+                                    isSuccess: false,
+                                  ));
+                        }
+                        if (state is LoginException) {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) =>
+                                  CustomDialogPrelaunch(
+                                    value: 'Opps terjadi kesalahan system',
                                     onTap: () {
                                       Navigator.pop(context);
                                     },

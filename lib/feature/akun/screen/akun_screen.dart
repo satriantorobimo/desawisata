@@ -1,3 +1,4 @@
+import 'package:desa_wisata_nusantara/feature/404/404_screen.dart';
 import 'package:desa_wisata_nusantara/feature/akun/bloc/akun/bloc.dart';
 import 'package:desa_wisata_nusantara/feature/akun/bloc/logout/bloc.dart';
 import 'package:desa_wisata_nusantara/feature/akun/domain/repo/akun_repo.dart';
@@ -78,6 +79,18 @@ class _AkunScreenState extends State<AkunScreen> {
                       }
                       if (state is AkunError) {
                         return Container();
+                      }
+                      if (state is AkunException) {
+                        return Error404Screen(onTap: () {
+                          SharedPreff().getSharedString('token').then((value) {
+                            if (value != null) {
+                              akunBloc.add(GetAkun());
+                              setState(() {
+                                isEligible = true;
+                              });
+                            }
+                          });
+                        });
                       }
                       return Container();
                     }),

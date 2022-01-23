@@ -28,7 +28,7 @@ class RefreshBloc extends Bloc<RefreshEvent, RefreshState> {
           yield RefreshError('error');
         }
       } catch (e) {
-        yield RefreshError('error');
+        yield RefreshException('error');
       }
     }
   }

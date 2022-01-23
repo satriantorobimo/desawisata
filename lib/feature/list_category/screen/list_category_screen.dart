@@ -1,3 +1,4 @@
+import 'package:desa_wisata_nusantara/feature/404/404_screen.dart';
 import 'package:desa_wisata_nusantara/feature/list_category/bloc/list_category/bloc.dart';
 import 'package:desa_wisata_nusantara/feature/list_category/domain/repo/list_category_repo.dart';
 
@@ -125,6 +126,12 @@ class _ListCategoryScreenState extends State<ListCategoryScreen> {
                           } else {
                             return popularMethod(dataDetail, false);
                           }
+                        }
+                        if (state is ListCategoryException) {
+                          return Error404Screen(onTap: () {
+                            listCategoryBloc.add(GetListCategory(
+                                widget.datas.id.toString(), 10, _page));
+                          });
                         }
                         return Container();
                       }))

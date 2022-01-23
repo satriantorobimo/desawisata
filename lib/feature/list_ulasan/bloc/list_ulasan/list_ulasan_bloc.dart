@@ -61,7 +61,7 @@ class ListUlasanBloc extends Bloc<ListUlasanEvent, ListUlasanState> {
         }
       } catch (e) {
         print(e);
-        yield ListUlasanError(e.toString());
+        yield ListUlasanException(e.toString());
       }
     }
 
@@ -93,7 +93,7 @@ class ListUlasanBloc extends Bloc<ListUlasanEvent, ListUlasanState> {
         }
       } catch (e) {
         print(e);
-        yield ListUlasanError(e.toString());
+        yield ListUlasanException(e.toString());
       }
     }
   }

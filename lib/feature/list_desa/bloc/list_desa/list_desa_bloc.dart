@@ -61,7 +61,7 @@ class ListDesaBloc extends Bloc<ListDesaEvent, ListDesaState> {
         }
       } catch (e) {
         print(e);
-        yield ListDesaError(e.toString());
+        yield ListDesaException(e.toString());
       }
     }
   }
